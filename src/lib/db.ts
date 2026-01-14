@@ -20,16 +20,32 @@ export type Ticket = {
 
 const defaultData: { tickets: Ticket[] } = { tickets: [] };
 
+// In-memory cache to persist data during the "warm" time of a Vercel lambda instance.
+// WARNING: This is NOT a permanent database. Data will still be lost when the lambda cold starts.
+let cachedData: { tickets: Ticket[] } | null = null;
+
 function readDB() {
-    if (!fs.existsSync(DB_PATH)) {
-        fs.writeFileSync(DB_PATH, JSON.stringify(defaultData));
-        return defaultData;
+    if (cachedData) return cachedData;
+
+    try {
+        if (!fs.existsSync(DB_PATH)) {
+            if (!fs.existsSync(DATA_DIR)) {
+                fs.mkdirSync(DATA_DIR, { recursive: true });
+            }
+            fs.writeFileSync(DB_PATH, JSON.stringify(defaultData));
+            cachedData = defaultData;
+            return defaultData;
+        }
+        const data = fs.readFileSync(DB_PATH, 'utf8');
+        cachedData = JSON.parse(data);
+        return cachedData!;
+    } catch (e) {
+        return cachedData || defaultData;
     }
-    const data = fs.readFileSync(DB_PATH, 'utf8');
-    return JSON.parse(data);
 }
 
 function writeDB(data: any) {
+    cachedData = data;
     try {
         fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2));
     } catch (error) {

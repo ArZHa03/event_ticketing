@@ -4,8 +4,10 @@ import { useState } from 'react';
 import { Loader2, ScanLine, CheckCircle2, XCircle } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import { useRouter } from 'next/navigation';
 
 export default function ScanPage() {
+    const router = useRouter();
     const [inputVal, setInputVal] = useState('');
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState<any>(null);
@@ -24,6 +26,10 @@ export default function ScanPage() {
             });
             const data = await res.json();
             setResult({ success: res.ok, data });
+
+            if (res.ok) {
+                router.refresh(); // Invalidate Next.js client-side cache
+            }
         } catch (err) {
             setResult({ success: false, data: { error: 'Network Error' } });
         } finally {
