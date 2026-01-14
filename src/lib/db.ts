@@ -30,7 +30,13 @@ function readDB() {
 }
 
 function writeDB(data: any) {
-    fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2));
+    try {
+        fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2));
+    } catch (error) {
+        console.error('DATABASE_WRITE_ERROR: Failed to write to db.json. This is expected on Vercel/Serverless environments if not using an external DB.', error);
+        // On Vercel, data will be lost when the lambda cold starts.
+        // For a permanent fix, the user should connect a real database.
+    }
 }
 
 export const db = {
