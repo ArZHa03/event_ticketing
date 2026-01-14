@@ -1,0 +1,25 @@
+{
+  "tickets": [
+    {
+      "id": "78552fbd-1c90-478b-9c84-e3a344b3ad97",
+      "name": "Budi Fetch Test",
+      "status": "UNREDEEMED",
+      "createdAt": "2026-01-14T06:12:14.424Z",
+      "redeemedAt": null
+    },
+    {
+      "id": "6196dbbe-290a-4d25-9b47-50ad1b45e050",
+      "name": "Zaki Ganteng",
+      "status": "UNREDEEMED",
+      "createdAt": "2026-01-14T06:20:26.383Z",
+      "redeemedAt": null
+    },
+    {
+      "id": "3eb54010-8578-4aea-aeb6-aa8955c23568",
+      "name": "ArZHa",
+      "status": "UNREDEEMED",
+      "createdAt": "2026-01-14T06:20:40.120Z",
+      "redeemedAt": null
+    }
+  ]
+}
