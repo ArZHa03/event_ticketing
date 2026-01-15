@@ -82,5 +82,14 @@ export const db = {
         data.tickets[index].redeemedAt = new Date().toISOString();
         writeDB(data);
         return data.tickets[index];
+    },
+    deleteTicket: (id: string) => {
+        const data = readDB();
+        const index = data.tickets.findIndex((t: Ticket) => t.id === id);
+        if (index === -1) return false;
+
+        data.tickets.splice(index, 1);
+        writeDB(data);
+        return true;
     }
 };

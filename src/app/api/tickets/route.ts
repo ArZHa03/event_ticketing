@@ -30,3 +30,23 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Failed to create ticket' }, { status: 500 });
     }
 }
+
+export async function DELETE(request: Request) {
+    try {
+        const { searchParams } = new URL(request.url);
+        const id = searchParams.get('id');
+
+        if (!id) {
+            return NextResponse.json({ error: 'ID is required' }, { status: 400 });
+        }
+
+        const success = db.deleteTicket(id);
+        if (!success) {
+            return NextResponse.json({ error: 'Ticket not found' }, { status: 404 });
+        }
+
+        return NextResponse.json({ message: 'Ticket deleted' });
+    } catch (error) {
+        return NextResponse.json({ error: 'Failed to delete ticket' }, { status: 500 });
+    }
+}
