@@ -194,36 +194,100 @@ class ApiService {
                             />
                         </section>
 
-                        {/* Section: Scanner Logic */}
-                        <section id="scanner-logic" className="scroll-mt-32 space-y-6 text-slate-700">
+                        {/* Section: UI Implementation */}
+                        <section id="ui-implementation" className="scroll-mt-32 space-y-10 text-slate-700">
                             <div className="flex items-center gap-3">
-                                <div className="p-2 bg-green-100 text-green-600 rounded-lg"><Code size={20} /></div>
-                                <h2 className="text-2xl font-bold text-slate-900">4. QR Scanner Implementation</h2>
+                                <div className="p-2 bg-pink-100 text-pink-600 rounded-lg"><Smartphone size={20} /></div>
+                                <h2 className="text-2xl font-bold text-slate-900">5. Connecting Logic to UI</h2>
                             </div>
-                            <p>Use the <code>mobile_scanner</code> package to create a beautiful scanner interface. When a code is detected, we send the data to our <code>scanTicket</code> API.</p>
-                            <CodeBlock
-                                id="scanner"
-                                title="lib/views/scanner_page.dart"
-                                code={`MobileScanner(
-  onDetect: (capture) async {
-    final List<Barcode> barcodes = capture.barcodes;
-    if (barcodes.isNotEmpty) {
-      final code = barcodes.first.rawValue;
-      if (code != null) {
-        try {
-          await apiService.scanTicket(code);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Ticket Redeemed!'))
-          );
-          Navigator.pop(context);
-        } catch (e) {
-          // Handle error
-        }
-      }
+                            <p>This is where everything comes together! We will create a <code>StatefulWidget</code> that uses our <code>ApiService</code> to fetch and display tickets.</p>
+
+                            <div className="space-y-6">
+                                <h3 className="text-xl font-semibold text-slate-800">The Home Page State</h3>
+                                <p>We need to manage the list of tickets and a loading state. We'll use <code>initState</code> to fetch data when the app starts.</p>
+                                <CodeBlock
+                                    id="ui-state"
+                                    title="lib/views/home_page.dart (Part 1)"
+                                    code={`class HomePage extends StatefulWidget {
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  final ApiService _api = ApiService();
+  List<Ticket> _tickets = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _refreshTickets();
+  }
+
+  Future<void> _refreshTickets() async {
+    setState(() => _isLoading = true);
+    try {
+      final data = await _api.getTickets();
+      setState(() => _tickets = data);
+    } finally {
+      setState(() => _isLoading = false);
     }
-  },
-)`}
-                            />
+  }
+}`} />
+                            </div>
+
+                            <div className="space-y-6">
+                                <h3 className="text-xl font-semibold text-slate-800">Building the List View</h3>
+                                <p>We'll use a <code>ListView.builder</code> to display the tickets and a <code>FloatingActionButton</code> to navigate to the scanner.</p>
+                                <CodeBlock
+                                    id="ui-build"
+                                    title="lib/views/home_page.dart (Part 2)"
+                                    code={`@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(title: Text('Event Scanner')),
+    body: _isLoading 
+      ? Center(child: CircularProgress() )
+      : RefreshIndicator(
+          onRefresh: _refreshTickets,
+          child: ListView.builder(
+            itemCount: _tickets.length,
+            itemBuilder: (context, index) {
+              final ticket = _tickets[index];
+              return ListTile(
+                title: Text(ticket.name),
+                subtitle: Text(ticket.status),
+                trailing: IconButton(
+                  icon: Icon(Icons.delete, color: Colors.red),
+                  onPressed: () => _deleteTicket(ticket.id),
+                ),
+              );
+            },
+          ),
+        ),
+    floatingActionButton: FloatingActionButton(
+      child: Icon(Icons.qr_code_scanner),
+      onPressed: () => Navigator.push(
+        context, 
+        MaterialPageRoute(builder: (_) => ScannerPage())
+      ).then((_) => _refreshTickets()), // Refresh when coming back!
+    ),
+  );
+}`} />
+                            </div>
+
+                            <div className="space-y-6">
+                                <h3 className="text-xl font-semibold text-slate-800">Important: How to Delete</h3>
+                                <p>To delete a ticket, call the service and then refresh the local state so the item disappears immediately.</p>
+                                <CodeBlock
+                                    id="ui-delete"
+                                    title="lib/views/home_page.dart (Logic)"
+                                    code={`Future<void> _deleteTicket(String id) async {
+  await _api.deleteTicket(id);
+  _refreshTickets(); // Simple way: fetch everything again
+  // Or: setState(() => _tickets.removeWhere((t) => t.id == id));
+}`} />
+                            </div>
                         </section>
 
                         {/* Conclusion */}
