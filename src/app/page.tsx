@@ -46,7 +46,8 @@ export default function Home() {
             <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">Event Tickets</h1>
             <p className="text-slate-500">Public Guest List</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-4">
+            <Link href="/tutorial" className="text-sm font-medium text-blue-600 hover:underline">Tutorial</Link>
             <Link href="/admin" className="text-sm font-medium text-blue-600 hover:underline">Admin</Link>
             <Link href="/scan" className="text-sm font-medium text-blue-600 hover:underline">Scanner</Link>
           </div>
